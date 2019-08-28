@@ -4,7 +4,7 @@ class BD
 {
     private $DB_NOME = "db_tai";
     private $DB_USUARIO = "root";
-    private $DB_SENHA = "123456";
+    private $DB_SENHA = "";
     private $DB_CHARSET = "utf8";
 
     public function connection()
@@ -48,14 +48,88 @@ class BD
 
         return $stmt;
     }
-}
 
+    function update($dados){
+        $id = $dados['id'];
+        $sql = "UPDATE tb_alunos SET ";
+
+        $flag = 0;
+        $arrayValue = [];
+        foreach($dados as $campo => $valor){
+            if($flag ==0){
+                $sql .= "$campo='$valor'";
+                $flag = 1;
+            }else{
+                $sql = ", $campo='$valor'";
+            }
+            $arrayValue[] = $valor;
+        }
+        $sql .= "WHERE id = $id;";
+
+        var_dump($sql);
+        $conn = $this->connection();
+        $stmt = $conn->prepare($sql);
+
+        $stmt->execute($arrayValue);
+
+        return $stmt;
+
+    }
+
+    function delete($id){
+        $conn = $this->connection();
+        $stmt = $conn->prepare("DELETE FROM tb_alunos WHERE id = $id");
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    function selectFind($id){
+        $sql = "SELECT * FROM tb_alunos WHERE id = $id;";
+
+        $conn = $this->connection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchObject();
+
+    }
+}
+/*
 $dados = array("nome" => "MARCOS",
     "curso" => "INFORMÁTICA - EMI",
     "turma" => "INFO14");
+*/
 
 $obj = new BD();
+/*
+//$aluno = $obj->insert($dados);
+//echo "INSERIDO COM SUCESSO!";
 
-$aluno = $obj->insert($dados);
+$dados_aluno = array(
+    "id" => 1,
+    "nome" => "MARIA CHIQUINHA",
+    "curso" => "INFORMÁTICA - EMI",
+    "turma" => "INFO6");
+    
+$aluno = $obj->update($dados);
+echo "UPDATE COM SUCESSO!";
 
-echo "INSERIDO COM SUCESSO!";
+//$obj->delete(2);
+//0echo "DELETADO COM SUCESSO!";
+*/
+
+$select = $obj->select();
+
+while($objAluno = $select->fetchObject()){
+    echo $objAluno->id ."<br>";
+    echo $objAluno->nome ."<br>";
+    echo $objAluno->curso ."<br>";
+    echo $objAluno->turma ."<br>";
+}
+
+$selectAluno = $obj->selectFind(2);
+
+var_dump($selectAluno);
+
+
