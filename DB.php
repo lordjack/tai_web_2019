@@ -1,18 +1,21 @@
 <?php
-
-class BD
+class DB
 {
     private $DB_NOME = "db_tai";
     private $DB_USUARIO = "root";
-    private $DB_SENHA = "";
+    private $DB_SENHA = "123456";
     private $DB_CHARSET = "utf8";
 
     public function connection()
     {
         $str_conn = "mysql:host=localhost;dbname=" . $this->DB_NOME;
 
-        return new PDO($str_conn, $this->DB_USUARIO, $this->DB_SENHA,
-            array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . $this->DB_CHARSET));
+        return new PDO(
+            $str_conn,
+            $this->DB_USUARIO,
+            $this->DB_SENHA,
+            array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . $this->DB_CHARSET)
+        );
     }
 
     public function select()
@@ -48,51 +51,47 @@ class BD
 
         return $stmt;
     }
-
-    function update($dados){
+    function update($dados)
+    {
         $id = $dados['id'];
         $sql = "UPDATE tb_alunos SET ";
-
         $flag = 0;
         $arrayValue = [];
-        foreach($dados as $campo => $valor){
-            if($flag ==0){
+
+        foreach ($dados as $campo => $valor) {
+            if ($flag == 0) {
                 $sql .= "$campo='$valor'";
                 $flag = 1;
-            }else{
+            } else {
                 $sql = ", $campo='$valor'";
             }
             $arrayValue[] = $valor;
         }
+
         $sql .= "WHERE id = $id;";
 
-        var_dump($sql);
         $conn = $this->connection();
         $stmt = $conn->prepare($sql);
-
         $stmt->execute($arrayValue);
 
         return $stmt;
-
     }
 
-    function delete($id){
+    function delete($id)
+    {
         $conn = $this->connection();
         $stmt = $conn->prepare("DELETE FROM tb_alunos WHERE id = $id");
         $stmt->execute();
-
         return $stmt;
     }
 
-    function selectFind($id){
+    function selectFind($id)
+    {
         $sql = "SELECT * FROM tb_alunos WHERE id = $id;";
-
         $conn = $this->connection();
         $stmt = $conn->prepare($sql);
         $stmt->execute();
-
         return $stmt->fetchObject();
-
     }
 }
 /*
@@ -100,12 +99,10 @@ $dados = array("nome" => "MARCOS",
     "curso" => "INFORMÁTICA - EMI",
     "turma" => "INFO14");
 */
-
-$obj = new BD();
+$obj = new DB();
 /*
 //$aluno = $obj->insert($dados);
 //echo "INSERIDO COM SUCESSO!";
-
 $dados_aluno = array(
     "id" => 1,
     "nome" => "MARIA CHIQUINHA",
@@ -114,22 +111,18 @@ $dados_aluno = array(
     
 $aluno = $obj->update($dados);
 echo "UPDATE COM SUCESSO!";
-
 //$obj->delete(2);
 //0echo "DELETADO COM SUCESSO!";
 */
-
 $select = $obj->select();
 
-while($objAluno = $select->fetchObject()){
-    echo $objAluno->id ."<br>";
-    echo $objAluno->nome ."<br>";
-    echo $objAluno->curso ."<br>";
-    echo $objAluno->turma ."<br>";
+while ($objAluno = $select->fetchObject()) {
+    echo $objAluno->id . "<br>";
+    echo $objAluno->nome . "<br>";
+    echo $objAluno->curso . "<br>";
+    echo $objAluno->turma . "<br>";
 }
 
-$selectAluno = $obj->selectFind(2);
+$selectAluno = $obj->selectFind(3);
 
 var_dump($selectAluno);
-
-
