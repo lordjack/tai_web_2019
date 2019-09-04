@@ -1,39 +1,62 @@
 <?php
+
+include_once 'config.php';
+
 class DB
 {
-    private $DB_NOME = "db_tai";
-    private $DB_USUARIO = "root";
-    private $DB_SENHA = "123456";
-    private $DB_CHARSET = "utf8";
-
-    public function connection()
+    public static function connection()
     {
-        $str_conn = "mysql:host=localhost;dbname=" . $this->DB_NOME;
+        $str_conn = "mysql:host=" . config::DB_HOST . ";dbname=" . config::DB_NOME;
 
         return new PDO(
             $str_conn,
-            $this->DB_USUARIO,
-            $this->DB_SENHA,
-            array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . $this->DB_CHARSET)
+            config::DB_USUARIO,
+            config::DB_SENHA,
+            array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . config::DB_CHARSET)
         );
     }
 
-    public function select()
+    public static function selectAll($tabela, $orderby = "")
     {
-        $conn = $this->connection();
-        $stmt = $conn->prepare("SELECT * FROM tb_alunos LIMIT 3");
+
+        $conn = self::connection();
+        $stmt = $conn->prepare("SELECT * FROM $tabela $orderby");
         $stmt->execute();
 
         return $stmt;
     }
 
-    public function insert($dados)
+    public static function selectFind($tabela, $condicao)
     {
-        $sql = "INSERT INTO tb_alunos(nome, curso, turma) VALUES(";
+
+        $sql = "SELECT * FROM $tabela WHERE $condicao";
+
+        $conn = self::connection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchObject();
+    }
+
+    public static function insert($tabela, $dados)
+    {
+        $sql = "INSERT INTO $tabela(";
+
+        $flag = 0;
+        foreach ($dados as $campo => $valor) {
+            if ($flag == 0) {
+                $sql .= $campo;
+            } else {
+                $sql .= ", $campo";
+            }
+            $flag = 1;
+        }
+
+        $sql .= ") VALUES(";
 
         $flag = 0;
         $arrayValue = [];
-        foreach ($dados as $valor) {
+        foreach ($dados as $campo => $valor) {
             if ($flag == 0) {
                 $sql .= "?";
                 $flag = 1;
@@ -42,87 +65,70 @@ class DB
             }
             $arrayValue[] = $valor;
         }
+
         $sql .= ");";
 
-        $conn = $this->connection();
+        $conn = self::connection();
         $stmt = $conn->prepare($sql);
 
         $stmt->execute($arrayValue);
 
         return $stmt;
     }
-    function update($dados)
+
+    public static function update($tabela, $dados)
     {
         $id = $dados['id'];
-        $sql = "UPDATE tb_alunos SET ";
+        var_dump($id);
+
+        $sql = "UPDATE $tabela SET ";
+
         $flag = 0;
         $arrayValue = [];
-
         foreach ($dados as $campo => $valor) {
             if ($flag == 0) {
                 $sql .= "$campo='$valor'";
                 $flag = 1;
             } else {
-                $sql = ", $campo='$valor'";
+                $sql .= ", $campo='$valor'";
             }
-            $arrayValue[] = $valor;
         }
 
-        $sql .= "WHERE id = $id;";
+        $sql .= " WHERE id = $id;";
 
-        $conn = $this->connection();
+        $conn = self::connection();
         $stmt = $conn->prepare($sql);
+
         $stmt->execute($arrayValue);
 
         return $stmt;
     }
 
-    function delete($id)
+    public static function delete($tabela, $id)
     {
-        $conn = $this->connection();
-        $stmt = $conn->prepare("DELETE FROM tb_alunos WHERE id = $id");
+        $conn = self::connection();
+        $stmt = $conn->prepare("DELETE FROM $tabela WHERE id = $id");
         $stmt->execute();
+
         return $stmt;
     }
-
-    function selectFind($id)
-    {
-        $sql = "SELECT * FROM tb_alunos WHERE id = $id;";
-        $conn = $this->connection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchObject();
-    }
 }
-/*
-$dados = array("nome" => "MARCOS",
-    "curso" => "INFORMÁTICA - EMI",
-    "turma" => "INFO14");
-*/
-$obj = new DB();
-/*
-//$aluno = $obj->insert($dados);
+
+$dados = array("nome" => "João",
+    "curso" => "INFORMÁTICA - TAI",
+    "turma" => "INFO06");
+
+$obj = new DB;
+//$obj->insert("tb_alunos",$dados);
 //echo "INSERIDO COM SUCESSO!";
-$dados_aluno = array(
-    "id" => 1,
-    "nome" => "MARIA CHIQUINHA",
-    "curso" => "INFORMÁTICA - EMI",
+/*
+$dados_update = array("nome" => "Maria",
+    "curso" => "INFORMÁTICA - TAI",
     "turma" => "INFO6");
+
     
-$aluno = $obj->update($dados);
-echo "UPDATE COM SUCESSO!";
-//$obj->delete(2);
-//0echo "DELETADO COM SUCESSO!";
+$obj->update("tb_alunos",$dados_update, 3);
+echo "ATUALIZADO COM SUCESSO!";
+$obj->delete("tb_alunos", 2);
+echo "DELETADO COM SUCESSO!";
 */
-$select = $obj->select();
-
-while ($objAluno = $select->fetchObject()) {
-    echo $objAluno->id . "<br>";
-    echo $objAluno->nome . "<br>";
-    echo $objAluno->curso . "<br>";
-    echo $objAluno->turma . "<br>";
-}
-
-$selectAluno = $obj->selectFind(3);
-
-var_dump($selectAluno);
