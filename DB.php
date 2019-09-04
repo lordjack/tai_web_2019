@@ -26,10 +26,10 @@ class DB
         return $stmt;
     }
 
-    public static function selectFind($tabela, $condicao)
+    public static function selectFind($tabela, $id)
     {
 
-        $sql = "SELECT * FROM $tabela WHERE $condicao";
+        $sql = "SELECT * FROM $tabela WHERE id = $id;";
 
         $conn = self::connection();
         $stmt = $conn->prepare($sql);
@@ -79,8 +79,6 @@ class DB
     public static function update($tabela, $dados)
     {
         $id = $dados['id'];
-        var_dump($id);
-
         $sql = "UPDATE $tabela SET ";
 
         $flag = 0;
@@ -107,7 +105,7 @@ class DB
     public static function delete($tabela, $id)
     {
         $conn = self::connection();
-        $stmt = $conn->prepare("DELETE FROM $tabela WHERE id = $id");
+        $stmt = $conn->prepare("DELETE FROM $tabela WHERE id = $id;");
         $stmt->execute();
 
         return $stmt;
