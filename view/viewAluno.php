@@ -38,7 +38,7 @@ if(!empty($_POST['form_submit'])){
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
           <li class="active">
-            <a href="viewMain.php"> Home </a>
+            <a href="../index.php"> Início </a>
           </li>
         </ul>
       </div>

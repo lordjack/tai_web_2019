@@ -66,6 +66,9 @@
           <labe>Ler Arquivos - </label>
           <a href="aula01/codigos/lerArquivo/view.php"> Ler Arquivos</a>
           </p>
+          <labe>Exemplo de CRUD com PDO- </label>
+          <a href="view/viewAluno.php"> Ler Arquivos</a>
+          </p>
         </p>
       </div>
     </main>
